@@ -28,11 +28,27 @@ class DefaultParser {
     this._imgsFolder = `${__dirname}/../../frontend/src/assets/img/pizzas-providers/${name}`;
   }
 
+  beforeRequest() {
+    return new Promise(function (resolve, reject) {
+      return resolve();
+    });
+  }
+
   getPizzasAndPizzasCategories() {
-    return new Promise(resolve => {
+    // we get the cooke from before request
+    return this.beforeRequest()
+    .then( (cookie) => {
+      console.log('on a le cookie %j', cookie );
+      return new Promise(resolve => {
       // fetch the website
       request(
-        Object.assign({ url: this._pizzeria.url }, requestOptions),
+        Object.assign({
+          url: this._pizzeria.url,
+          jar: true,
+          headers: {
+            'Cookie': cookie,
+          }
+        }, requestOptions),
         (error, response, body) => {
           if (!error && response.statusCode == 200) {
             // build the response object containing the pizzas and pizzas categories
@@ -49,8 +65,11 @@ class DefaultParser {
 
             // we get the categories list
             this._sectionsDom = this.parseSectionDom();
+            console.log(this._sectionsDom.length);
+            console.log(this._$.text());
 
             this._sectionsDom.map(i => {
+              console.log('test');
               this._sectionDom = this._$(this._sectionsDom[i]);
 
               const pizzaCategory = this.parsePizzaCategory();
@@ -112,6 +131,7 @@ class DefaultParser {
             resolve(res);
           }
         });
+    });
     });
   }
 
