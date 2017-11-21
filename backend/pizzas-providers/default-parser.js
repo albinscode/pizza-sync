@@ -38,6 +38,7 @@ class DefaultParser {
     // we get the cooke from before request
     return this.beforeRequest()
     .then( (cookie) => {
+      console.log(this._pizzeria.url);
       console.log('on a le cookie %j', cookie );
       return new Promise(resolve => {
       // fetch the website
@@ -46,6 +47,12 @@ class DefaultParser {
           url: this._pizzeria.url,
           jar: true,
           headers: {
+          ':authority': 'www.laboiteapizza.com',
+          ':method': 'GET',
+          ':path': '/commande/respT/1381',
+          ':scheme': 'https',
+            'referer': 'https://www.laboiteapizza.com/commande/shop/category/7357',
+            'x-requested-with': 'XMLHttpRequest',
             'Cookie': cookie,
           }
         }, requestOptions),
@@ -59,6 +66,12 @@ class DefaultParser {
               ingredients: []
             };
 
+            if (body.indexOf('Hot Fever') !== -1) {
+              console.log('COOL !');
+            }
+            else {
+              console.log('pas cool');
+            }
             this._$ = cheerio.load(body);
 
             res.pizzeria.phone = this.parsePhone();
@@ -66,7 +79,7 @@ class DefaultParser {
             // we get the categories list
             this._sectionsDom = this.parseSectionDom();
             console.log(this._sectionsDom.length);
-            console.log(this._$.text());
+            // console.log(this._$.text());
 
             this._sectionsDom.map(i => {
               console.log('test');
