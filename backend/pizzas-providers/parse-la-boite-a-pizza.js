@@ -57,9 +57,9 @@ class LaBoiteAPizza extends DefaultParser {
 
   parsePhone() {
     // the phone will be parsed on the previous body page
-    // const $2 = cheerio.load(this._previousBody);
-    // return $2('#contentTitle');
-    return '0561833833';
+    const $2 = cheerio.load(this._previousBody);
+    return $2('#contentTitle').text();
+    // return '0561833833';
   }
 
   parseSectionDom() {

@@ -4,7 +4,7 @@
   "license": "MIT",
   "scripts": {
     "test": "./node_modules/.bin/mocha --reporter spec --recursive",
-    "watch": "./node_modules/.bin/mocha --watch --reporter spec --recursive"
+    "watch": "./node_modules/.bin/mocha --watch --reporter spec --recursive --grep boite"
   },
   "dependencies": {
     "body-parser": "1.16.0",
