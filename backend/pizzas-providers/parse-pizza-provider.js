@@ -2,10 +2,12 @@ const conf = require('../conf.json');
 
 const { TuttiPizza } = require('./parse-tutti-pizza');
 const { PizzaDeLOrmeau } = require('./parse-pizza-de-l-ormeau');
+const { LaBoiteAPizza } = require('./parse-la-boite-a-pizza');
 
 const providers = {
   'tutti': TuttiPizza,
-  'ormeau': PizzaDeLOrmeau
+  'ormeau': PizzaDeLOrmeau,
+  'boite': LaBoiteAPizza
 };
 
 /**
