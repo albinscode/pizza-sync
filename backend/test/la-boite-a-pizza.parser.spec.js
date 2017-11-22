@@ -11,8 +11,8 @@ describe('>>>> La boite à pizza parsing', function() {
         .then(function (result) {
           result.pizzeria.name.should.ok();
           result.pizzeria.url.should.ok();
-          result.pizzeria.phone.should.equal('0825 800 333');
-          result.pizzas.length.should.be.above(30);
+          result.pizzeria.phone.should.equal('0561833833');
+          result.pizzas.length.should.be.above(10);
           done();
       }).catch( e =>  done(e));
     });

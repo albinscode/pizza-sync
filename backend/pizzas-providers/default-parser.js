@@ -8,6 +8,12 @@ const { PizzasModel } = require('../models/pizzas.model');
 const { PizzasCategoriesModel } = require('../models/pizzas-categories.model');
 const { IngredientsModel } = require('../models/ingredients.model');
 
+const DEBUG = true;
+
+if (DEBUG) {
+  require('request-debug')(request);
+}
+
 /**
  * This default parser allows to ease the creation of a new parser.
  */
@@ -35,27 +41,16 @@ class DefaultParser {
   }
 
   getPizzasAndPizzasCategories() {
-    // we get the cooke from before request
+    // we get the cookie from before request
     return this.beforeRequest()
-    .then( (cookie) => {
-      console.log(this._pizzeria.url);
-      console.log('on a le cookie %j', cookie );
+    .then( () => {
       return new Promise(resolve => {
       // fetch the website
       request(
-        Object.assign({
+        {
           url: this._pizzeria.url,
           jar: true,
-          headers: {
-          ':authority': 'www.laboiteapizza.com',
-          ':method': 'GET',
-          ':path': '/commande/respT/1381',
-          ':scheme': 'https',
-            'referer': 'https://www.laboiteapizza.com/commande/shop/category/7357',
-            'x-requested-with': 'XMLHttpRequest',
-            'Cookie': cookie,
-          }
-        }, requestOptions),
+        },
         (error, response, body) => {
           if (!error && response.statusCode == 200) {
             // build the response object containing the pizzas and pizzas categories
@@ -66,23 +61,18 @@ class DefaultParser {
               ingredients: []
             };
 
-            if (body.indexOf('Hot Fever') !== -1) {
-              console.log('COOL !');
-            }
-            else {
-              console.log('pas cool');
-            }
             this._$ = cheerio.load(body);
 
             res.pizzeria.phone = this.parsePhone();
 
             // we get the categories list
             this._sectionsDom = this.parseSectionDom();
-            console.log(this._sectionsDom.length);
-            // console.log(this._$.text());
+
+            if (DEBUG) {
+              console.log('There will be %j category(ies)', this._sectionsDom.length);
+            }
 
             this._sectionsDom.map(i => {
-              console.log('test');
               this._sectionDom = this._$(this._sectionsDom[i]);
 
               const pizzaCategory = this.parsePizzaCategory();
@@ -136,6 +126,9 @@ class DefaultParser {
 
                 finalPizzaCategory.pizzasIds.push(finalPizza.id);
                 res.pizzas.push(finalPizza);
+                if (DEBUG) {
+                  console.log('We gabbed a new pizza! %j', finalPizza);
+                }
               });
             });
 

@@ -1,9 +1,12 @@
 const { DefaultParser } = require('./default-parser');
 const denodeify = require('denodeify');
 const request = denodeify(require('request'));
-const url = 'https://www.laboiteapizza.com/commande/respT/1381';
+const url = 'https://www.laboiteapizza.com/commande/respT/1040';
 const name = 'LaBoiteAPizza';
 
+const cheerio = require('cheerio');
+
+// TODO urls to be externalized!
 const url1 = 'https://www.laboiteapizza.com/commande/shop/load?id=49';
 const url2 = 'https://www.laboiteapizza.com/commande/shop/category/7357';
 
@@ -19,6 +22,7 @@ class LaBoiteAPizza extends DefaultParser {
 
   constructor() {
     super(name, url);
+    this._previousBody = '';
   }
 
   /**
@@ -26,64 +30,25 @@ class LaBoiteAPizza extends DefaultParser {
    */
   beforeRequest() {
     let cookie = '';
+    const self = this;
     return new Promise(function (resolve, reject) {
-      // We need to fetch the cookie
-      request( { url: url1})
-      .then( (response, body) => {
-          console.log('Fetching page');
-          // console.log(error);
-          // if (error) reject('Network problems, check your internet settings: ' + error);
-
-          // if (response.headers['set-cookie'] === undefined) {
-          //   console.log('Cannot get a cookie!');
-          //   reject();
-          // }
-          let cookieLemonLdapServer = response.headers['set-cookie'][0];
-          cookie = cookieLemonLdapServer.split(';')[0];
-          console.log('cookie' + cookie);
-
+      // We need to fetch the cookie and to propagate it along the whole session
+      request(
+        {
+          url: url1,
+          jar: true,
+        }
+      )
+      .then( (response) => {
           return request( {
             url: url2,
             jar: true,
-            headers: {
-              'Cookie': cookie,
-            }
           });
         }
       )
-      .then( (response, body) => {
-          console.log('Fetching page 2');
-          if (response.body.indexOf('Toulouse Dupuy') !== -1) {
-            console.log('youpi !!');
-          }
-          else {
-            console.log('youpi !!');
-          }
-
-          // console.log(response.body);
-          /*
-          :authority:www.laboiteapizza.com
-          :method:GET
-          :path:/commande/respT/1381
-          :scheme:https
-          accept:*
-          accept-encoding:gzip, deflate, sdch, br
-          accept-language:fr-FR,fr;q=0.8,en-US;q=0.6,en;q=0.4
-            cookie:PHPSESSID=e5ec4i7ti2vfp5mc2osrmunah5; _ga=GA1.2.1316901557.1511300248; _gid=GA1.2.644148628.1511300248
-              referer:https://www.laboiteapizza.com/commande/shop/category/7357
-              user-agent:Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/53.0.2785.143 Chrome/53.0.2785.143 Safari/537.36
-              x-requested-with:XMLHttpRequest
-
-              */
-          // if (error) reject('Network problems, check your internet settings: ' + error);
-
-          // if (response.headers['set-cookie'] === undefined) {
-          //   console.log('Cannot get a cookie!');
-          //   reject();
-          // }
-          // var cookieLemonLdap = cookieLemonLdapServer.split(';')[0];
-          console.log(cookie);
-          resolve(cookie);
+      .then( (response) => {
+          self._previousBody = response.body;
+          resolve();
         }
       );
     });
@@ -91,7 +56,10 @@ class LaBoiteAPizza extends DefaultParser {
   }
 
   parsePhone() {
-    return this._$('#deliveryText div').first().text().trim().substring(0, 12);
+    // the phone will be parsed on the previous body page
+    // const $2 = cheerio.load(this._previousBody);
+    // return $2('#contentTitle');
+    return '0561833833';
   }
 
   parseSectionDom() {
@@ -103,23 +71,25 @@ class LaBoiteAPizza extends DefaultParser {
   }
 
   parsePizzasDom() {
-    return this._sectionDom.find(this._$('.boxContent'));
+    return this._sectionDom.find('.productBox');
   }
 
   parsePizzaName() {
-    return this._pizzaDom.find(this._$('.item-name')).text();
+    return this._pizzaDom.find('.productName').text();
   }
 
   parsePizzaIngredients() {
-    return this._pizzaDom.find(this._$('.item-ingredients')).text();
+    return this._pizzaDom.find('.productDescription').text();
   }
 
   parsePrices() {
-    return this._pizzaDom.find(this._$('.item-price'));
+    // TODO, prices are embedded within javascript
+    // And list too much linked to pizza de l'ormeau, to be refactorized
+    return this._pizzaDom.find('.productPriceCommand');
   }
 
   parsePizzaImage() {
-   return this._pizzaDom.find('.item-img img').attr('src');
+   return this._pizzaDom.find('.picture img').attr('src');
   }
 }
 
