@@ -38,7 +38,14 @@ class TuttiPizza extends DefaultParser {
   }
 
   parsePrices() {
-    return this._pizzaDom.find(this._$('.item-price'));
+    const self = this;
+    const result = [];
+    this._pizzaDom.find(this._$('.item-price'))
+      .each( (i, elt) => {
+        // map of a cheerio object is redefined, so we use an intermediate array
+        result.push(parseFloat(self._$(elt).text().replace(',', '.').replace(' €', '')));
+      });
+    return result;
   }
 
   parsePizzaImage() {

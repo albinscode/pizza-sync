@@ -93,7 +93,6 @@ class DefaultParser {
 
                 const pizzaName = this.parsePizzaName();
                 const pizzaIngredientsTxt = this.parsePizzaIngredients();
-                const pizzaPricesDom = this.parsePrices();
 
                 const pizzaIngredientsTxtArray = pizzaIngredientsTxt
                   .replace('.', '')
@@ -107,11 +106,7 @@ class DefaultParser {
 
                 const pizzaIngredients = pizzaIngredientsTxtArray.map(IngredientsModel.registerIfNewAndGetId);
 
-                const pizzaPrices = [];
-                pizzaPricesDom.map(k => {
-                  const price = this._$(pizzaPricesDom[k]).children().remove().end().text().replace(',', '.');
-                  pizzaPrices.push(parseFloat(price));
-                });
+                const pizzaPrices = this.parsePrices();
 
                 // some cross site ;)
                 const pizzaImg = this.parsePizzaImage();
@@ -127,7 +122,7 @@ class DefaultParser {
                 finalPizzaCategory.pizzasIds.push(finalPizza.id);
                 res.pizzas.push(finalPizza);
                 if (DEBUG) {
-                  console.log('We gabbed a new pizza! %j', finalPizza);
+                  console.log('We grabbed a new pizza! %j', finalPizza);
                 }
               });
             });

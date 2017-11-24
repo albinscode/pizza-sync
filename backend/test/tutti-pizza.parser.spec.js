@@ -13,6 +13,12 @@ describe('>>>> Tutti parsing', function() {
           result.pizzeria.url.should.ok();
           result.pizzeria.phone.should.equal('');
           result.pizzas.length.should.be.above(30);
+
+          const firstPizza = result.pizzas[0];
+          firstPizza.prices.length.should.be.equal(2);
+          firstPizza.prices[0].should.be.equal(7.5);
+          firstPizza.prices[1].should.be.equal(11.5);
+
           done();
       }).catch( e =>  done(e));
     });

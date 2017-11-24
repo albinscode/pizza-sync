@@ -6,8 +6,9 @@ const name = 'LaBoiteAPizza';
 
 const cheerio = require('cheerio');
 
-// TODO urls to be externalized!
-const url1 = 'https://www.laboiteapizza.com/commande/shop/load?id=49';
+const conf = require('../conf.json');
+
+const urlTemplate = 'https://www.laboiteapizza.com/commande/shop';
 const url2 = 'https://www.laboiteapizza.com/commande/shop/category/7357';
 
 /**
@@ -29,6 +30,7 @@ class LaBoiteAPizza extends DefaultParser {
    * The http request to execute before the pizzas fetch.
    */
   beforeRequest() {
+    const url1 = `${urlTemplate}/load?id=${conf.providersPrefs.boite.shop}`;
     let cookie = '';
     const self = this;
     return new Promise(function (resolve, reject) {
@@ -58,8 +60,7 @@ class LaBoiteAPizza extends DefaultParser {
   parsePhone() {
     // the phone will be parsed on the previous body page
     const $2 = cheerio.load(this._previousBody);
-    return $2('#contentTitle').text();
-    // return '0561833833';
+    return $2('#contentTitle div span').text();
   }
 
   parseSectionDom() {
@@ -83,9 +84,11 @@ class LaBoiteAPizza extends DefaultParser {
   }
 
   parsePrices() {
-    // TODO, prices are embedded within javascript
-    // And list too much linked to pizza de l'ormeau, to be refactorized
-    return this._pizzaDom.find('.productPriceCommand');
+    return Object.values(this._pizzaDom.find('.productBox input[type="hidden"]'))
+      .map( (input) => input && input.attribs ? parseFloat(input.attribs.value) : 0)
+      .filter ( (elt) => elt !== 0)
+      .splice(0, 3)
+      .sort( (a, b) => a - b) ;
   }
 
   parsePizzaImage() {
