@@ -43,12 +43,14 @@ class DefaultParser {
   getPizzasAndPizzasCategories() {
     // we get the cookie from before request
     return this.beforeRequest()
-    .then( () => {
+    .then( () => this.getCategories())
+    .then( (urls) => {
       return new Promise(resolve => {
       // fetch the website
       request(
         {
-          url: this._pizzeria.url,
+          // We have several urls?
+          url: urls ? urls[0] : this._pizzeria.url,
           jar: true,
         },
         (error, response, body) => {
@@ -152,6 +154,13 @@ class DefaultParser {
   parsePrices() { }
 
   parsePizzaImage() { }
+
+  /*
+   * @return an array of categories if any on the current page
+   */
+  getCategories() {
+    return new Promise();
+  }
 }
 
 module.exports = { DefaultParser };

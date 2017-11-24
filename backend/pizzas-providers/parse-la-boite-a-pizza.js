@@ -33,7 +33,7 @@ class LaBoiteAPizza extends DefaultParser {
     const url1 = `${urlTemplate}/load?id=${conf.providersPrefs.boite.shop}`;
     let cookie = '';
     const self = this;
-    return new Promise(function (resolve, reject) {
+    return new Promise( (resolve, reject) => {
       // We need to fetch the cookie and to propagate it along the whole session
       request(
         {
@@ -55,6 +55,13 @@ class LaBoiteAPizza extends DefaultParser {
       );
     });
 
+  }
+
+  getCategories() {
+    return new Promise ( (resolve, reject) => {
+      // TODO we have to parse the menu to get the list of categories with their name and url
+      resolve([url2]);
+    });
   }
 
   parsePhone() {
