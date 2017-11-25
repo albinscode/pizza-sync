@@ -10,6 +10,7 @@ const conf = require('../conf.json');
 
 const urlTemplate = 'https://www.laboiteapizza.com/commande/shop';
 const url2 = 'https://www.laboiteapizza.com/commande/shop/category/7357';
+const url3 = 'https://www.laboiteapizza.com/commande/respT/1040';
 
 /**
  * La boite à pizza allows to manage several shops.
@@ -26,12 +27,10 @@ class LaBoiteAPizza extends DefaultParser {
     this._previousBody = '';
   }
 
-  /**
-   * The http request to execute before the pizzas fetch.
-   */
+
+  // Executed once before pizzas fetching
   beforeRequest() {
     const url1 = `${urlTemplate}/load?id=${conf.providersPrefs.boite.shop}`;
-    let cookie = '';
     const self = this;
     return new Promise( (resolve, reject) => {
       // We need to fetch the cookie and to propagate it along the whole session
@@ -42,10 +41,21 @@ class LaBoiteAPizza extends DefaultParser {
         }
       )
       .then( (response) => {
-          return request( {
-            url: url2,
-            jar: true,
-          });
+          self._previousBody = response.body;
+          resolve();
+        }
+      );
+    });
+  }
+
+  beforeEachCategoryRequest() {
+    const self = this;
+    return new Promise( (resolve, reject) => {
+      // We need to fetch the cookie and to propagate it along the whole session
+      request(
+        {
+          url: url2,
+          jar: true,
         }
       )
       .then( (response) => {
@@ -54,13 +64,12 @@ class LaBoiteAPizza extends DefaultParser {
         }
       );
     });
-
   }
 
   getCategories() {
     return new Promise ( (resolve, reject) => {
       // TODO we have to parse the menu to get the list of categories with their name and url
-      resolve([url2]);
+      resolve([url3]);
     });
   }
 

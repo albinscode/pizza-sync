@@ -40,17 +40,38 @@ class DefaultParser {
     });
   }
 
+  beforeEachCategoryRequest() {
+    return new Promise(function (resolve, reject) {
+      return resolve();
+    });
+  }
+
   getPizzasAndPizzasCategories() {
     // we get the cookie from before request
     return this.beforeRequest()
-    .then( () => this.getCategories())
-    .then( (urls) => {
+      // we get categories urls if not on same page
+      .then( () => this.getCategories())
+      .then( (urls) => this.fetchPizzas(urls));
+  }
+
+  fetchPizzas(urls) {
+    // we execute promises sequentially
+    return urls.reduce(
+      (p, url) => p.then(
+        () => this.beforeEachCategoryRequest(url)
+          .then( () => this.fetchPizza(url))
+      ),
+      Promise.resolve()
+    );
+  }
+
+  fetchPizza(url) {
       return new Promise(resolve => {
       // fetch the website
       request(
         {
           // We have several urls?
-          url: urls ? urls[0] : this._pizzeria.url,
+          url: url,
           jar: true,
         },
         (error, response, body) => {
@@ -135,8 +156,8 @@ class DefaultParser {
           }
         });
     });
-    });
   }
+
 
   // interfaces methods to be implemented
   parsePhone() { }
