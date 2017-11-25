@@ -73,16 +73,16 @@ class LaBoiteAPizza extends DefaultParser {
             categoryUrl: 'https://www.laboiteapizza.com/commande/shop/category/7357',
             categoryName: 'trad'
           },
-          // {
-          //   url: url3,
-          //   categoryUrl: 'https://www.laboiteapizza.com/commande/shop/category/7358',
-          //   categoryName: 'trad2'
-          // },
-          // {
-          //   url: url3,
-          //   categoryUrl: 'https://www.laboiteapizza.com/commande/shop/category/7359',
-          //   categoryName: 'trad3'
-          // }
+          {
+            url: url3,
+            categoryUrl: 'https://www.laboiteapizza.com/commande/shop/category/7557',
+            categoryName: 'trad2'
+          },
+          {
+            url: url3,
+            categoryUrl: 'https://www.laboiteapizza.com/commande/shop/category/7357',
+            categoryName: 'trad3'
+          }
         ]
       );
     });

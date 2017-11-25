@@ -30,6 +30,14 @@ class DefaultParser {
       url: url
     };
 
+    // build the response object containing the pizzas and pizzas categories
+    this._res = {
+      pizzeria: this._pizzeria,
+      pizzas: [],
+      pizzasCategories: [],
+      ingredients: []
+    };
+
     // folder that contains the pizzas images
     this._imgsFolder = `${__dirname}/../../frontend/src/assets/img/pizzas-providers/${name}`;
   }
@@ -59,7 +67,7 @@ class DefaultParser {
     return urls.reduce(
       (p, url) => p.then(
         () => this.beforeEachCategoryRequest(url.categoryUrl)
-          .then( () => this.fetchPizza(url.url))
+          .then( () => this.fetchPizza(url))
       ),
       Promise.resolve()
     );
@@ -71,22 +79,15 @@ class DefaultParser {
       request(
         {
           // We have several urls?
-          url: url,
+          url: url.url,
           jar: true,
         },
         (error, response, body) => {
           if (!error && response.statusCode == 200) {
-            // build the response object containing the pizzas and pizzas categories
-            const res = {
-              pizzeria: this._pizzeria,
-              pizzas: [],
-              pizzasCategories: [],
-              ingredients: []
-            };
 
             this._$ = cheerio.load(body);
 
-            res.pizzeria.phone = this.parsePhone();
+            this._res.pizzeria.phone = this.parsePhone();
 
             // we get the categories list
             this._sectionsDom = this.parseSectionDom();
@@ -98,7 +99,11 @@ class DefaultParser {
             this._sectionsDom.map(i => {
               this._sectionDom = this._$(this._sectionsDom[i]);
 
-              const pizzaCategory = this.parsePizzaCategory();
+              let pizzaCategory = url.categoryName;
+              // category name not fetched from multiple pages, we fetch it from current pizza page
+              if (!pizzaCategory) {
+                pizzaCategory = this.parsePizzaCategory();
+              }
 
               const finalPizzaCategory = {
                 id: PizzasCategoriesModel.getNewId(),
@@ -106,7 +111,7 @@ class DefaultParser {
                 pizzasIds: []
               };
 
-              res.pizzasCategories.push(finalPizzaCategory);
+              this._res.pizzasCategories.push(finalPizzaCategory);
 
               // we browse each pizza
               this._pizzasDom = this.parsePizzasDom();
@@ -143,16 +148,16 @@ class DefaultParser {
                 };
 
                 finalPizzaCategory.pizzasIds.push(finalPizza.id);
-                res.pizzas.push(finalPizza);
+                this._res.pizzas.push(finalPizza);
                 if (DEBUG) {
                   console.log('We grabbed a new pizza! %j', finalPizza);
                 }
               });
             });
 
-            res.ingredients = IngredientsModel.getIngredients();
+            this._res.ingredients = IngredientsModel.getIngredients();
 
-            resolve(res);
+            resolve(this._res);
           }
         });
     });
@@ -176,11 +181,8 @@ class DefaultParser {
 
   parsePizzaImage() { }
 
-  /*
-   * @return an array of categories if any on the current page
-   */
   getCategories() {
-    return new Promise();
+    return new Promise( (resolve, reject) => resolve( [ { url: this._pizzeria.url } ] ));
   }
 }
 
