@@ -58,8 +58,8 @@ class DefaultParser {
     // we execute promises sequentially
     return urls.reduce(
       (p, url) => p.then(
-        () => this.beforeEachCategoryRequest(url)
-          .then( () => this.fetchPizza(url))
+        () => this.beforeEachCategoryRequest(url.categoryUrl)
+          .then( () => this.fetchPizza(url.url))
       ),
       Promise.resolve()
     );

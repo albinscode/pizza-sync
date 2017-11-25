@@ -9,7 +9,6 @@ const cheerio = require('cheerio');
 const conf = require('../conf.json');
 
 const urlTemplate = 'https://www.laboiteapizza.com/commande/shop';
-const url2 = 'https://www.laboiteapizza.com/commande/shop/category/7357';
 const url3 = 'https://www.laboiteapizza.com/commande/respT/1040';
 
 /**
@@ -48,18 +47,16 @@ class LaBoiteAPizza extends DefaultParser {
     });
   }
 
-  beforeEachCategoryRequest() {
-    const self = this;
+  beforeEachCategoryRequest(url) {
     return new Promise( (resolve, reject) => {
       // We need to fetch the cookie and to propagate it along the whole session
       request(
         {
-          url: url2,
+          url: url,
           jar: true,
         }
       )
       .then( (response) => {
-          self._previousBody = response.body;
           resolve();
         }
       );
@@ -69,7 +66,25 @@ class LaBoiteAPizza extends DefaultParser {
   getCategories() {
     return new Promise ( (resolve, reject) => {
       // TODO we have to parse the menu to get the list of categories with their name and url
-      resolve([url3]);
+      resolve(
+        [
+          {
+            url: url3,
+            categoryUrl: 'https://www.laboiteapizza.com/commande/shop/category/7357',
+            categoryName: 'trad'
+          },
+          // {
+          //   url: url3,
+          //   categoryUrl: 'https://www.laboiteapizza.com/commande/shop/category/7358',
+          //   categoryName: 'trad2'
+          // },
+          // {
+          //   url: url3,
+          //   categoryUrl: 'https://www.laboiteapizza.com/commande/shop/category/7359',
+          //   categoryName: 'trad3'
+          // }
+        ]
+      );
     });
   }
 
