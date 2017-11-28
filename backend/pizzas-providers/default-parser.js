@@ -8,7 +8,7 @@ const { PizzasModel } = require('../models/pizzas.model');
 const { PizzasCategoriesModel } = require('../models/pizzas-categories.model');
 const { IngredientsModel } = require('../models/ingredients.model');
 
-const DEBUG = true;
+const DEBUG = false;
 
 if (DEBUG) {
   require('request-debug')(request);

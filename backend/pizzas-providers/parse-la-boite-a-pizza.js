@@ -57,6 +57,7 @@ class LaBoiteAPizza extends DefaultParser {
         }
       )
       .then( (response) => {
+
           resolve();
         }
       );
@@ -65,26 +66,9 @@ class LaBoiteAPizza extends DefaultParser {
 
   getCategories() {
     return new Promise ( (resolve, reject) => {
-      // TODO we have to parse the menu to get the list of categories with their name and url
-      resolve(
-        [
-          {
-            url: url3,
-            categoryUrl: 'https://www.laboiteapizza.com/commande/shop/category/7357',
-            categoryName: 'trad'
-          },
-          {
-            url: url3,
-            categoryUrl: 'https://www.laboiteapizza.com/commande/shop/category/7557',
-            categoryName: 'trad2'
-          },
-          {
-            url: url3,
-            categoryUrl: 'https://www.laboiteapizza.com/commande/shop/category/7357',
-            categoryName: 'trad3'
-          }
-        ]
-      );
+      const $2 = cheerio.load(this._previousBody);
+      Object.values($2('#contentLeft').find('div>ul>li>a')).map(elt => console.log('test' + elt));
+      resolve();
     });
   }
 

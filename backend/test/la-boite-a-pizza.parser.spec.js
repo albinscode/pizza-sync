@@ -15,9 +15,9 @@ describe('>>>> La boite à pizza parsing', function() {
           result.pizzas.length.should.equal(36);
           result.pizzasCategories.length.should.equal(3);
           console.log(result.pizzasCategories);
-          result.pizzasCategories[0].name.should.equal('trad');
-          result.pizzasCategories[1].name.should.equal('trad2');
-          result.pizzasCategories[2].name.should.equal('trad3');
+          result.pizzasCategories[0].name.should.equal('Les Traditionnelles');
+          result.pizzasCategories[1].name.should.equal('Les Gourmandes');
+          result.pizzasCategories[2].name.should.equal('Les Prestiges');
           done();
       }).catch( e =>  done(e));
     });
