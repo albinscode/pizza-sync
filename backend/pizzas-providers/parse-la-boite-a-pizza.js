@@ -1,15 +1,14 @@
 const { DefaultParser } = require('./default-parser');
 const denodeify = require('denodeify');
 const request = denodeify(require('request'));
-const url = 'https://www.laboiteapizza.com/commande/respT/1040';
 const name = 'LaBoiteAPizza';
 
 const cheerio = require('cheerio');
 
 const conf = require('../conf.json');
 
-const urlTemplate = 'https://www.laboiteapizza.com/commande/shop';
-const url3 = 'https://www.laboiteapizza.com/commande/respT/1040';
+const urlTemplate = 'https://www.laboiteapizza.com';
+const url = `${urlTemplate}/commande/respT/1040`;
 
 /**
  * La boite à pizza allows to manage several shops.
@@ -29,7 +28,7 @@ class LaBoiteAPizza extends DefaultParser {
 
   // Executed once before pizzas fetching
   beforeRequest() {
-    const url1 = `${urlTemplate}/load?id=${conf.providersPrefs.boite.shop}`;
+    const url1 = `${urlTemplate}/commande/shop/load?id=${conf.providersPrefs.boite.shop}`;
     const self = this;
     return new Promise( (resolve, reject) => {
       // We need to fetch the cookie and to propagate it along the whole session
@@ -64,11 +63,25 @@ class LaBoiteAPizza extends DefaultParser {
     });
   }
 
+  extractCategories(html) {
+    const urlCategories = [];
+    const $ = cheerio.load(html);
+    $('div[class="boxContentWithoutBottom"] a')
+      .filter( (index, elt) => index > 2 && index < 6)
+      .each( (index, elt) => urlCategories.push(
+        {
+          'url': url,
+          'categoryUrl': urlTemplate + $(elt).attr('href'),
+          'categoryName': $(elt).text().trim()
+        }));
+
+    return urlCategories;
+  }
+
   getCategories() {
+    var self = this;
     return new Promise ( (resolve, reject) => {
-      const $2 = cheerio.load(this._previousBody);
-      Object.values($2('#contentLeft').find('div>ul>li>a')).map(elt => console.log('test' + elt));
-      resolve();
+      resolve(self.extractCategories(self._previousBody));
     });
   }
 
