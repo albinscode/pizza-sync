@@ -87,8 +87,8 @@ class LaBoiteAPizza extends DefaultParser {
 
   parsePhone() {
     // the phone will be parsed on the previous body page
-    const $2 = cheerio.load(this._previousBody);
-    return $2('#contentTitle div span').text();
+    const $ = cheerio.load(this._previousBody);
+    return $('#contentTitle div span').text();
   }
 
   parseSectionDom() {
@@ -112,9 +112,9 @@ class LaBoiteAPizza extends DefaultParser {
   }
 
   parsePrices() {
-    return Object.values(this._pizzaDom.find('.productBox input[type="hidden"]'))
-      .map( (input) => input && input.attribs ? parseFloat(input.attribs.value) : 0)
-      .filter ( (elt) => elt !== 0)
+    return this._pizzaDom.find('.productBox input[type="hidden"]')
+      .map( (index, input) => input && input.attribs ? parseFloat(input.attribs.value) : 0)
+      .filter ( (index, elt) => elt !== 0)
       .splice(0, 3)
       .sort( (a, b) => a - b) ;
   }
