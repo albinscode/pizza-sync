@@ -11,18 +11,31 @@
     "lint:fix": "yarn-or-npm run lint:check -- --fix",
     "check": "yarn-or-npm run lint:check && yarn-or-npm run prettier:check",
     "check:fix": "yarn-or-npm run lint:fix; yarn-or-npm run prettier:fix",
-    "prettier:base":
-      "yarn-or-npm run prettier -- --single-quote --trailing-comma es5",
-    "prettier:base-files":
-      "yarn-or-npm run prettier:base -- './**/*.{js,ts,json}'",
+    "prettier:base": "yarn-or-npm run prettier -- --single-quote --trailing-comma es5",
+    "prettier:base-files": "yarn-or-npm run prettier:base -- './**/*.{js,ts,json}'",
     "prettier:fix": "yarn-or-npm run prettier:base-files -- --write",
     "prettier:check": "yarn-or-npm run prettier:base-files -- -l",
     "precommit": "lint-staged",
-    "prepush": "yarn-or-npm run lint:check"
+    "prepush": "yarn-or-npm run lint:check",
+    "test": "jest"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.tsx?$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+    },
+    "testRegex": "(/__test__/.*|\\.(test|spec))\\.ts$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "json"
+    ]
   },
   "lint-staged": {
     "linters": {
-      "*.{js,ts,json}": ["yarn-or-npm run prettier:base -- -l"]
+      "*.{js,ts,json}": [
+        "yarn-or-npm run prettier:base -- -l"
+      ]
     }
   },
   "dependencies": {
@@ -47,14 +60,19 @@
   "devDependencies": {
     "@types/cheerio": "0.22.5",
     "@types/cors": "2.8.3",
-    "@types/node": "8.0.53",
+    "@types/jest": "^22.0.1",
+    "@types/node": "^8.5.7",
     "@types/normalizr": "2.0.18",
     "@types/request": "2.0.8",
     "@types/uuid": "3.4.3",
     "husky": "0.14.3",
+    "jest": "^22.0.4",
     "lint-staged": "5.0.0",
+    "mocha": "4.1.0",
     "nodemon": "1.12.1",
+    "nyc": "^11.4.1",
     "prettier": "1.8.2",
+    "ts-jest": "^22.0.1",
     "ts-node": "3.3.0",
     "tslint": "5.8.0",
     "tslint-config-prettier": "1.6.0",
