@@ -1,4 +1,3 @@
-import { get } from 'request';
 import * as cheerio from 'cheerio';
 
 import {
@@ -9,6 +8,14 @@ import {
 } from './pizzas-providers.interface';
 import { requestOptions } from '../../helpers/http.helper';
 import { getPathImgPizza } from '../../helpers/file.helper';
+
+const DEBUG = true;
+
+let get = require('request');
+
+if (DEBUG) {
+  require('request-debug')(get);
+}
 
 export abstract class BasicPizzasProvider {
   //  used to write in console autocomplete
@@ -38,7 +45,7 @@ export abstract class BasicPizzasProvider {
 export abstract class PizzaProviderMock extends BasicPizzasProvider {
   private pizzeriaMock: IPizzeriaNestedFkWithoutId;
   // no need for mocks to define this properties
-  // has it'll be found from the mock object
+  // as it'll be found from the mock object
   longCompanyName = '';
   phone = '';
   url = '';
@@ -72,6 +79,13 @@ export abstract class PizzasProvider extends BasicPizzasProvider {
 
     const pizzasCategories = this.parsePagesAndMergePizzasCategories(pages);
 
+    if (DEBUG) {
+      console.log('There will be %j category(ies)', pizzasCategories.length);
+    }
+
+    // FIXME what if categories cannot be parsed on pizza page side
+    // but on a dedicated page?
+
     return {
       pizzeria: {
         ...this.getPizzeriaInformation(),
@@ -96,16 +110,18 @@ export abstract class PizzasProvider extends BasicPizzasProvider {
   private fetchPages(): Promise<CheerioStatic[]> {
     const pages: Promise<CheerioStatic>[] = this.urlsPizzasPages.map(url => {
       return new Promise((resolve, reject) => {
-        get(url, requestOptions, (error, response, body) => {
-          if (error || response.statusCode !== 200) {
-            const err = `Error while trying to fetch the pizza provider "${
-              this.longCompanyName
-            }" with the following URL: "${this.url}"`;
+        this.beforePizzaRequest().then( () => {
+            get(url, requestOptions, (error, response, body) => {
+              if (error || response.statusCode !== 200) {
+                const err = `Error while trying to fetch the pizza provider "${
+                  this.longCompanyName
+                }" with the following URL: "${this.url}"`;
 
-            reject(err);
-          } else {
-            resolve(cheerio.load(body));
-          }
+                reject(err);
+              } else {
+                resolve(cheerio.load(body));
+              }
+          });
         });
       });
     });
@@ -155,6 +171,10 @@ export abstract class PizzasProvider extends BasicPizzasProvider {
 
     const pizzaName = this.getPizzaName(pizzaDom);
 
+    if (DEBUG) {
+      console.log('We grabbed a new pizza! %j', pizzaName);
+    }
+
     return {
       name: pizzaName,
       imgUrl: this.getLocalOrDistantImage(pizzaDom, pizzaName),
@@ -200,4 +220,20 @@ export abstract class PizzasProvider extends BasicPizzasProvider {
   abstract getPizzaImage(
     pizzaWrapper?: Cheerio
   ): { localFolderName: string } | { distantUrl: string };
+
+  // called before each pizza request
+  // (to authenticate to a dedicated url for example)
+  beforePizzaRequest() {
+    return new Promise(function (resolve, reject) {
+      return resolve();
+    });
+  }
+
+  // called before each category request when categories are
+  // on a different page
+  beforeEachCategoryRequest() {
+    return new Promise(function (resolve, reject) {
+      return resolve();
+    });
+  }
 }
