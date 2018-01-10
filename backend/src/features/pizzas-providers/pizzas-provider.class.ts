@@ -9,7 +9,7 @@ import {
 import { requestOptions } from '../../helpers/http.helper';
 import { getPathImgPizza } from '../../helpers/file.helper';
 
-const DEBUG = true;
+const DEBUG = false;
 
 let get = require('request');
 
@@ -68,6 +68,12 @@ export abstract class PizzasProvider extends BasicPizzasProvider {
     __dirname
   }/../../../../frontend/src/assets/img/pizzas-providers`;
 
+  // the page where to find categories if any
+  // otherwise the pizza page will be used
+  protected abstract categoryUrl: string = null;
+
+  protected abstract categories: string[] = [];
+
   // the URLs of the differents pages to parse the pizzas
   // most pizzas website only have one but some of them have many
   protected abstract urlsPizzasPages: string[];
@@ -97,9 +103,11 @@ export abstract class PizzasProvider extends BasicPizzasProvider {
   private parsePagesAndMergePizzasCategories(
     pages: CheerioStatic[]
   ): IPizzaCategoryFkWithoutId[] {
+    // FIXME to use the pop...
+    this.categories = this.categories.reverse();
     return pages.reduce(
       (acc, page) => {
-        const { pizzasCategories } = this.parsePage(page);
+        const { pizzasCategories } = this.parsePage(page, this.categories.pop());
 
         return [...acc, ...pizzasCategories];
       },
@@ -107,7 +115,33 @@ export abstract class PizzasProvider extends BasicPizzasProvider {
     );
   }
 
+  private fetchCategoriesPage(): Promise<{categoryName: string, categoryUrl: string} []> {
+
+    if (this.categoryUrl) {
+      return new Promise((resolve, reject) => {
+        resolve([]);
+      });
+    }
+    else {
+      return new Promise((resolve, reject) => {
+        resolve([]);
+      });
+    }
+  }
+
   private fetchPages(): Promise<CheerioStatic[]> {
+    // TODO we have to specify urls grabbed from categories
+    const categoriesPromise = this.fetchCategoriesPage().then ( (categories: {categoryName: string, categoryUrl: string}[]) => {
+      if (categories.length > 0) {
+        this.urlsPizzasPages = categories.map(elem => elem.categoryUrl);
+        this.categories = categories.map(elem => elem.categoryUrl);
+      }
+      // TODO if useful we can add functional error
+      // for example not specifying categoriesPage and urlsPizzasPages at the same time
+    });
+
+    Promise.all([categoriesPromise]);
+
     const pages: Promise<CheerioStatic>[] = this.urlsPizzasPages.map(url => {
       return new Promise((resolve, reject) => {
         this.beforePizzaRequest().then( () => {
@@ -134,23 +168,29 @@ export abstract class PizzasProvider extends BasicPizzasProvider {
   // BUT, it'd be a better idea not to override it
   // and simply define the parsing methods `getPhone`, etc
   protected parsePage(
-    $: CheerioStatic
+    $: CheerioStatic,
+    pizzaCategoryName: string = null
   ): { pizzasCategories: IPizzaCategoryFkWithoutId[] } {
     const pizzasCategoriesWrapper = this.getPizzasCategoriesWrapper($);
 
     const pizzasCategories = pizzasCategoriesWrapper
       .toArray()
-      .map(pizzaCategoryHtml => this.parsePizzaCategory($, pizzaCategoryHtml));
+      .map(pizzaCategoryHtml => this.parsePizzaWithCategory($, pizzaCategoryHtml, pizzaCategoryName));
 
     return { pizzasCategories };
   }
 
-  private parsePizzaCategory(
+  private parsePizzaWithCategory(
     $: CheerioStatic,
-    pizzaCategoryHtml: CheerioElement
+    pizzaCategoryHtml: CheerioElement,
+    pizzaCategoryName: string
   ): IPizzaCategoryFkWithoutId {
     const pizzaCategoryDom = $(pizzaCategoryHtml);
-    const pizzaCategoryName = this.getPizzaCategoryName(pizzaCategoryDom);
+
+    // value not fetched on another page, we try on this one
+    if (pizzaCategoryName === null) {
+      this.getPizzaCategoryName(pizzaCategoryDom);
+    }
 
     const pizzasDoms = this.getPizzasWrappers(pizzaCategoryDom);
     const pizzas = pizzasDoms

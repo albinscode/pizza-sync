@@ -1,3 +1,9 @@
 {
-  "defaultProvider": "Ormeau"
+  "defaultProvider": "Ormeau",
+  "providersPrefs": {
+    "boite": {
+      "shop": "49"
+    }
+  },
+  "defaultProvider": "boite"
 }
